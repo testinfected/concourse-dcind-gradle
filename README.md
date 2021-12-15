@@ -1,7 +1,7 @@
 # concourse-dcind-gradle
 Docker in Docker containers on the JVM. Optimized for use with [Concourse CI](http://concourse.ci/).
 
-The images are Alpine or Ubuntu based. They includes Docker, Docker Compose, Docker Compose Switch, and Gradle as well as Bash.
+The images are Alpine or Ubuntu based. They include Docker, Docker Compose, Docker Compose Switch, and Gradle as well as Bash.
 
 Images published to Docker Hub: [testinfected/dcind-gradle](https://hub.docker.com/repository/docker/testinfected/dcind-gradle).
 
@@ -9,7 +9,7 @@ Inspired by [karlkfi/concourse-dcind](https://github.com/karlkfi/concourse-dcind
 
 ## Features
 
-Like karlkfi/concourse-dcind, this image:
+Like karlkfi/concourse-dcind, these images:
 
 - Does not require the user to manually start docker.
 - Uses errexit, pipefail, and nounset.
@@ -18,7 +18,7 @@ Like karlkfi/concourse-dcind, this image:
 - Passes through `--garden-mtu` from the parent Gardian container if `--mtu` is not specified in `DOCKER_OPTS`.
 - Sets `--data-root /scratch/docker` to bypass the graph filesystem if `--data-root` is not specified in `DOCKER_OPTS`.
 
-On top of karlkfi/concourse-dcind, this image:
+On top of karlkfi/concourse-dcind, these images:
 
 - Includes Gradle for projects on the JVM
 - Preloads all Concourse images in OCI format that are inputs to the Job

@@ -11,17 +11,17 @@ Inspired by [karlkfi/concourse-dcind](https://github.com/karlkfi/concourse-dcind
 
 Like karlkfi/concourse-dcind, these images:
 
-- Does not require the user to manually start docker.
-- Uses errexit, pipefail, and nounset.
-- Configures timeout (`DOCKERD_TIMEOUT`) on dockerd start to account for mis-configuration (docker log will be output).
-- Accepts arbitrary dockerd arguments via optional `DOCKER_OPTS` environment variable.
-- Passes through `--garden-mtu` from the parent Gardian container if `--mtu` is not specified in `DOCKER_OPTS`.
-- Sets `--data-root /scratch/docker` to bypass the graph filesystem if `--data-root` is not specified in `DOCKER_OPTS`.
+- Do not require the user to manually start docker.
+- Use errexit, pipefail, and nounset.
+- Configure timeout (`DOCKERD_TIMEOUT`) on dockerd start to account for mis-configuration (docker log will be output).
+- Accept arbitrary dockerd arguments via optional `DOCKER_OPTS` environment variable.
+- Pass through `--garden-mtu` from the parent Gardian container if `--mtu` is not specified in `DOCKER_OPTS`.
+- Set `--data-root /scratch/docker` to bypass the graph filesystem if `--data-root` is not specified in `DOCKER_OPTS`.
 
 On top of karlkfi/concourse-dcind, these images:
 
-- Includes Gradle for projects on the JVM
-- Preloads all Concourse images in OCI format that are inputs to the Job
+- Include Gradle for projects on the JVM
+- Preload all Concourse images in OCI format that are inputs to the Job
 
 ## Build
 

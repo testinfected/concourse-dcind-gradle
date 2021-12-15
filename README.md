@@ -40,6 +40,23 @@ make ubuntu
 Here is an example of a Concourse [job](http://concourse.ci/concepts.html) that uses ```testinfects/dcind-gradle``` image that spawns a Selenium image using Docker Compose, and then runs the integration test suite. You can find a full version of this example in the [```bee-software/kickstart```](https://github.com/bee-software/kickstart/blob/master/ci/pipeline.yml) repository.
 
 ```yaml
+---
+resources:
+  - name: code
+    type: git
+    icon: github
+    source:
+      uri: https://github.com/bee-software/kickstart.git
+      branch: master
+
+  - name: selenium-chrome
+    type: registry-image
+    icon: docker
+    source:
+      repository: selenium/standalone-chrome
+#      tag: 96.0
+
+
 jobs:
   - name: acceptance
     plan:
@@ -49,6 +66,7 @@ jobs:
             depth: 1
           passed: [test]
           trigger: true
+        # Get Selenium image in OCI format
         - get: selenium-chrome
           params: {format: oci}
       - task: acceptance-tests

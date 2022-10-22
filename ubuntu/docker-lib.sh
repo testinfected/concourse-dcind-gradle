@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 # Inspired by https://github.com/karlkfi/concourse-dcind
+# See https://github.com/concourse/docker-image-resource/blob/a43ad7b03f39f42e795045adb82f466e5af6d38b/assets/common.sh
 
 set -e          # exit on command errors
 set -o nounset  # abort on unbound variable
@@ -15,17 +16,22 @@ DOCKER_OPTS="${DOCKER_OPTS:-}"
 PID_FILE="/tmp/docker.pid"
 LOG_FILE="/tmp/docker.log"
 
-sanitize_cgroups() {
-  local cgroup="/sys/fs/cgroup"
 
-  mkdir -p "${cgroup}"
-  if ! mountpoint -q "${cgroup}"; then
-    if ! mount -t tmpfs -o uid=0,gid=0,mode=0755 cgroup "${cgroup}"; then
+sanitize_cgroups() {
+  # Skip cgroup sanitization for cgroup v2
+  # See https://github.com/concourse/docker-image-resource/commit/a43ad7b03f39f42e795045adb82f466e5af6d38b
+  if [ -e /sys/fs/cgroup/cgroup.controllers ]; then
+    return
+  fi
+
+  mkdir -p /sys/fs/cgroup
+  if ! mountpoint -q /sys/fs/cgroup; then
+    if ! mount -t tmpfs -o uid=0,gid=0,mode=0755 cgroup /sys/fs/cgroup; then
       echo >&2 "Could not make a tmpfs mount. Did you use --privileged?"
       exit 1
     fi
   fi
-  mount -o remount,rw "${cgroup}"
+  mount -o remount,rw /sys/fs/cgroup
 
   # Skip AppArmor
   # See: https://github.com/moby/moby/commit/de191e86321f7d3136ff42ff75826b8107399497
@@ -45,37 +51,37 @@ sanitize_cgroups() {
       continue
     fi
 
-    grouping="$(cat /proc/self/cgroup | cut -d: -f2 | grep "\\<${sys}\\>")"
+    grouping="$(cat /proc/self/cgroup | cut -d: -f2 | grep "\\<${sys}\\>")" || true
     if [[ -z "${grouping}" ]]; then
       # subsystem not mounted anywhere; mount it on its own
       grouping="${sys}"
     fi
 
-    mountpoint="${cgroup}/${grouping}"
+    mountpoint="/sys/fs/cgroup/$grouping"
 
-    mkdir -p "${mountpoint}"
+    mkdir -p "$mountpoint"
 
     # clear out existing mount to make sure new one is read-write
-    if mountpoint -q "${mountpoint}"; then
-      umount "${mountpoint}"
+    if mountpoint -q "$mountpoint"; then
+      umount "$mountpoint"
     fi
 
-    mount -n -t cgroup -o "${grouping}" cgroup "${mountpoint}"
+    mount -n -t cgroup -o "$grouping" cgroup "$mountpoint"
 
-    if [[ "${grouping}" != "${sys}" ]]; then
-      if [[ -L "${cgroup}/${sys}" ]]; then
-        rm "${cgroup}/${sys}"
+    if [ "$grouping" != "$sys" ]; then
+      if [ -L "/sys/fs/cgroup/$sys" ]; then
+        rm "/sys/fs/cgroup/$sys"
       fi
 
-      ln -s "${mountpoint}" "${cgroup}/${sys}"
+      ln -s "$mountpoint" "/sys/fs/cgroup/$sys"
     fi
   done
 
   # Initialize systemd cgroup if host isn't using systemd.
   # Workaround for https://github.com/docker/for-linux/issues/219
   if ! [[ -d /sys/fs/cgroup/systemd ]]; then
-    mkdir "${cgroup}/systemd"
-    mount -t cgroup -o none,name=systemd cgroup "${cgroup}/systemd"
+    mkdir /sys/fs/cgroup/systemd
+    mount -t cgroup -o none,name=systemd none /sys/fs/cgroup/systemd
   fi
 }
 

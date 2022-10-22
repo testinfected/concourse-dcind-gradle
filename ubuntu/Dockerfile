@@ -1,9 +1,9 @@
 FROM gradle:7-jdk17
 
-ARG DOCKER_VERSION=20.10.10
+ARG DOCKER_VERSION=20.10.20
 ENV DOCKER_URL="https://download.docker.com/linux/static/stable/x86_64/docker-${DOCKER_VERSION}.tgz"
 
-ARG COMPOSE_VERSION=2.0.1
+ARG COMPOSE_VERSION=2.12.0
 ENV COMPOSE_URL="https://github.com/docker/compose/releases/download/v${COMPOSE_VERSION}/docker-compose-linux-x86_64"
 
 ARG COMPOSE_SWITCH_VERSION=1.0.2
